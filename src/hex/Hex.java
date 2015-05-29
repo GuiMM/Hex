@@ -13,19 +13,29 @@ import java.util.ArrayList;
  */
 public class Hex {
     
-    
-    public boolean horizontalGanhou(){
+    public boolean horizontalGanhou(Grafo g){
         boolean ganhou=false;
-        if(temCaminhoHorizontal()){
-            ganhou=true;
+        ArrayList<Integer> visitados = new ArrayList<Integer>();
+        for (int i = 0; i < 3; i++) {
+           if (g.tabuleiro.get(i*4).peca=='h') {
+               if(temCaminhoHorizontal( g.tabuleiro.get(i*4),visitados)){
+                ganhou=true;
+               } 
+            }
         }
         
         return ganhou;
     }
-    public boolean verticalGanhou(){
+    public boolean verticalGanhou(Grafo g){
         boolean ganhou=false;
-        if(temCaminhoVertical()){
-            ganhou=true;
+        ArrayList<Integer> visitados = new ArrayList<Integer>();
+        for (int i = 0; i < 3; i++) {
+            if (g.tabuleiro.get(i).peca=='v') {
+               if(temCaminhoVertical(g.tabuleiro.get(i),visitados)){
+                ganhou=true;
+               } 
+            }
+           
         }
         
         return ganhou;
@@ -34,37 +44,80 @@ public class Hex {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        Grafo grafo = new Grafo();
+    
+
+    private boolean temCaminhoHorizontal( Nodo atual,ArrayList<Integer> visitados) {
+        //busca do caminho
+        boolean chegouDoOutrolado = false;
+        visitados.add(atual.numero);                                                //bota o vertice atual na lista de vertices já visitados.
+        ArrayList<Nodo> fronteira;
+        if (nivelColuna(atual.numero)==3) {
+            return true;
+        }
+        fronteira = fronteiraPeca(atual,'h');                                       //analisa as fronteiras do nó atual, em busca do tipo de peça passado.
+        fronteira = eliminaVisitados(fronteira,visitados);
         
+        for (Nodo vizinhoDeAtual: fronteira) {                                      //passando por todos os vizinhos do no atual.
+               chegouDoOutrolado = temCaminhoHorizontal( vizinhoDeAtual,visitados); 
+               if (chegouDoOutrolado) {                                             //obriga a retornar caso encontre um caminho valido                    
+                break;
+                }
+        }
+        return chegouDoOutrolado;
+    }
+    
+    private ArrayList<Nodo> fronteiraPeca(Nodo atual, char tipo) {
+        ArrayList<Nodo> fronteira = new ArrayList<>();                              //guardará os vértices que fazem fronteira com o vertice atual
+        
+        for (Nodo v: atual.vizinhos) {                                              //passando por todos os vizinhos do no atual.
+            if (v.peca==tipo) {
+                fronteira.add(v);                                                   //colhe o no cuja peca é a horizontal.
+            }
+            
+        }
+        return fronteira;
     }
 
-    private boolean temCaminhoHorizontal(Grafo grafo) {
-        //busca do caminho
-        ArrayList<Integer> caminhoPercorrido = new ArrayList<>();
-        boolean chegouDoOutrolado = false;
-        for (int i = 0; i < 4; i++) {
-            if (grafo.tabuleiro.get(nivelColuna(i)).peca=='h') {
-                caminhoPercorrido.add(i);
-                for (int j = 0; j < ; j++) {
-                    
+    private ArrayList<Nodo> eliminaVisitados(ArrayList<Nodo> fronteira, ArrayList<Integer> visitados) {
+         ArrayList<Nodo> novaFronteira = new ArrayList<Nodo>();                                
+         
+         for (Nodo a: fronteira) {                                                  //passando por todos os vertices da fronteira
+            novaFronteira.add(a);
+             for (Integer b: visitados) {                                           //se o vertice 'a' em fronteira ja foi visitado ele nao fara mais parte da fronteira...
+                if (a.numero==b) {
+                    novaFronteira.remove(a);
                 }
-                    Node proxMarcado =
-                    if (grafo.tabuleiro.get(nivelColuna(i)).peca=='h'){}
-                    
-                    if () {
-                        chegouDoOutrolado=true;
-                    }
-                
-                
-                
             }
         }
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         return novaFronteira;
     }
 
     private int nivelColuna(int i) {
         return i%4;
     }
+    private int nivelLinha(int i) {
+        return i/4;
+    }
+
+    private boolean temCaminhoVertical(Nodo atual, ArrayList<Integer> visitados) {
+         //busca do caminho
+        boolean chegouDoOutrolado = false;
+        visitados.add(atual.numero);                                                //bota o vertice atual na lista de vertices já visitados.
+        ArrayList<Nodo> fronteira;
+        if (nivelLinha(atual.numero)==3) {
+            return true;
+        }
+        fronteira = fronteiraPeca(atual,'v');                                       //analisa as fronteiras do nó atual, em busca do tipo de peça passado.
+        fronteira = eliminaVisitados(fronteira,visitados);
+        
+        for (Nodo vizinhoDeAtual: fronteira) {                                      //passando por todos os vizinhos do no atual.
+            chegouDoOutrolado = temCaminhoVertical(vizinhoDeAtual,visitados); 
+            if (chegouDoOutrolado) {                                                //obriga a retornar caso encontre um caminho valido
+                break;
+            }   
+        }
+        return chegouDoOutrolado;
+    }
+    
     
 }
