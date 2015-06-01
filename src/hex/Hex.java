@@ -6,12 +6,50 @@
 package hex;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
  * @author Guilherme
  */
 public class Hex {
+    
+    public NodoJogada MinMax(Grafo jogada, int profundidade , char jogador){
+        NodoJogada novo = new NodoJogada(jogada);
+        if (horizontalGanhou(jogada)) {                                         //
+            novo.score = -1;
+            return novo;
+        }
+        if (verticalGanhou(jogada)) {
+            novo.score = 1;
+            return novo;
+        }
+        novo.proximas_Jogadas = gerarJogadas(jogada, jogador);
+        for (int i = 0; i < novo.proximas_Jogadas.size(); i++) {
+            if (jogador == 'h'){ 
+                novo.scores.set(i, MinMax(novo.proximas_Jogadas.get(i),profundidade-1,'v').score);
+            }else{
+                novo.scores.set(i, MinMax(novo.proximas_Jogadas.get(i),profundidade-1,'h').score);
+            }
+            if (jogador=='v' && novo.scores.get(i)==-1) {
+                novo.score=-1;
+                return novo;
+            }else
+                if (jogador=='h'&& novo.scores.get(i)==1) {
+                    novo.score = 1;
+                    return novo;
+            }
+        }
+            
+        return novo;
+    }
+    
+    public void jogo(Grafo inicio){
+    //implementar o jogo minmax ta pronto(mas falta debugar).
+    
+    
+    }
+    
     
     public boolean horizontalGanhou(Grafo g){
         boolean ganhou=false;
@@ -117,6 +155,28 @@ public class Hex {
             }   
         }
         return chegouDoOutrolado;
+    }
+
+    public ArrayList<Grafo> gerarJogadas(Grafo jogada, char jogador) {
+        ArrayList<Grafo> jogadas = new ArrayList<>();
+        for (int i = 0; i < jogada.tabuleiro.size(); i++) {
+            if (jogada.tabuleiro.get(i).peca==' ') {
+                jogada.tabuleiro.get(i).peca=jogador;
+                Grafo novo =  jogada;
+                novo = copiarGrafo(jogada);
+                jogadas.add(novo);
+                jogada.tabuleiro.get(i).peca=' ';
+                
+            }
+        }
+        return jogadas;
+    }
+    Grafo copiarGrafo(Grafo original) {
+        Grafo copia = new Grafo();
+        for (int i = 0; i <original.tabuleiro.size();i++) {
+            copia.tabuleiro.get(i).peca = original.tabuleiro.get(i).peca;
+        }
+        return copia;
     }
     
     

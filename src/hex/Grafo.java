@@ -115,5 +115,7 @@ public class Grafo {
         tabuleiro.get(15).vizinhos.add(a11);
         tabuleiro.get(15).vizinhos.add(a14);
     }
+
+    
     
 }

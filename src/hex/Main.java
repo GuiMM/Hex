@@ -5,6 +5,8 @@
  */
 package hex;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author MQGuilherme
@@ -21,12 +23,14 @@ public class Main {
         grafo.tabuleiro.get(10).peca='h';
         grafo.tabuleiro.get(7).peca='h';
         grafo.tabuleiro.get(2).peca='v';
-        grafo.tabuleiro.get(5).peca='v';
+        grafo.tabuleiro.get(5).peca='h';
         grafo.tabuleiro.get(9).peca='v';
         grafo.tabuleiro.get(10).peca='v';
         grafo.tabuleiro.get(11).peca='v';
         grafo.tabuleiro.get(13).peca='v';
-        
+        //ArrayList<Grafo> aux = new ArrayList<>();
+        //aux = jogo.gerarJogadas(grafo, 'v');
         System.out.println(jogo.verticalGanhou(grafo));
+        System.out.println(jogo.horizontalGanhou(grafo));
     }
 }

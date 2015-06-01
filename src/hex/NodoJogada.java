@@ -11,14 +11,15 @@ import java.util.ArrayList;
  *
  * @author Guilherme
  */
-public class Nodo {
-    int numero;
-    ArrayList<Nodo> vizinhos = new ArrayList<>();
-    char peca;
+public class NodoJogada {
+    Grafo jogada;
+    int score;
+    ArrayList<Grafo> proximas_Jogadas;
+    ArrayList<Integer> scores;
+    public NodoJogada(Grafo jogada){
+        proximas_Jogadas = new ArrayList<>();
+        this.jogada = jogada;
     
-    public Nodo(int num){
-        numero=num;
-        peca=' ';
     }
-
+    
 }
