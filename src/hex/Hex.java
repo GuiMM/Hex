@@ -6,7 +6,7 @@
 package hex;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Scanner;
 
 /**
  *
@@ -24,12 +24,23 @@ public class Hex {
             novo.score = 1;
             return novo;
         }
-        novo.proximas_Jogadas = gerarJogadas(jogada, jogador);
+        //construindo, para todos os grafos retornados, um objeto NodoJogada.
+        ArrayList<Grafo> possiveisJogadas = gerarJogadas(jogada, jogador);
+        for (int i = 0; i <possiveisJogadas.size(); i++) {
+            NodoJogada novoFilho = new NodoJogada(possiveisJogadas.get(i));
+            novo.proximas_Jogadas.add(novoFilho);
+        }
+        
+        //chamndo o codigo de novo
         for (int i = 0; i < novo.proximas_Jogadas.size(); i++) {
-            if (jogador == 'h'){ 
-                novo.scores.set(i, MinMax(novo.proximas_Jogadas.get(i),profundidade-1,'v').score);
+            if (jogador == 'h'){
+                System.out.println("to aqui chamndo pra v");
+                int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'v').score;
+                novo.scores.add(auxScore);
             }else{
-                novo.scores.set(i, MinMax(novo.proximas_Jogadas.get(i),profundidade-1,'h').score);
+                System.out.println("to aqui chamndo pra h");
+                int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'h').score;
+                novo.scores.add(auxScore);
             }
             if (jogador=='v' && novo.scores.get(i)==-1) {
                 novo.score=-1;
@@ -40,13 +51,65 @@ public class Hex {
                     return novo;
             }
         }
-            
+        if (profundidade%2==0) {                                                //par é máx
+            int maiorScore = maximoScore(novo.scores);
+            novo.score = maiorScore;
+            System.out.println("to aqui pegando o maiorScore");
+        }
+        else {
+            int menorScore = minimoScore(novo.scores);                          //min é impar
+            novo.score = menorScore;
+            System.out.println("to aqui pegando o menor score");
+        }
+        System.out.println("to aqui retornando");    
         return novo;
     }
     
-    public void jogo(Grafo inicio){
-    //implementar o jogo minmax ta pronto(mas falta debugar).
-    
+    public void start(Grafo inicio){
+        //implementar o jogo. Minmax ta pronto(mas falta debugar).
+        boolean jogarNovamente =true;
+        Grafo jogo = new Grafo();
+        NodoJogada arvoreMinMax;
+        char pecaHumano;
+        boolean alguemGanhou = false;
+        Scanner tec = new Scanner(System.in);
+        int jogadaHumano;
+        System.out.println("quer jogar com qual peça? h/v");
+        pecaHumano = tec.nextLine().charAt(0);
+        
+        arvoreMinMax = MinMax(jogo,0,pecaHumano);
+        do{
+        while(!alguemGanhou){
+            
+            //jogada do humano
+             System.out.println("escolha uma posição para sua jogada");
+             jogadaHumano = tec.nextInt();
+             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ') {
+                 System.out.println("esta posição esta ocupada, faça outra jogada válida");
+             }
+             jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
+             
+            //jogada do computador
+             int jogadaComputador = minimoScore(arvoreMinMax.scores);
+             arvoreMinMax = arvoreMinMax.proximas_Jogadas.get(jogadaComputador);
+             jogo.tabuleiro=arvoreMinMax.jogada.tabuleiro;
+             
+             if (horizontalGanhou(jogo)||verticalGanhou(jogo)) {
+                 if ((horizontalGanhou(jogo) & pecaHumano=='h')||(verticalGanhou(jogo) & pecaHumano=='v')) {
+                     System.out.println("Vc ganhou humano! ¬¬");
+                 }else
+                     System.out.println("eu ganhei fii.");
+                 alguemGanhou =true;
+            }
+        
+        }
+            System.out.println("quer jogar de novo? s/n");
+            char resposta = tec.nextLine().charAt(0);
+            if (resposta=='n') {
+                jogarNovamente = false;
+            }
+        }while(jogarNovamente);
+        
     
     }
     
@@ -67,7 +130,7 @@ public class Hex {
     public boolean verticalGanhou(Grafo g){
         boolean ganhou=false;
         ArrayList<Integer> visitados = new ArrayList<Integer>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             if (g.tabuleiro.get(i).peca=='v') {
                if(temCaminhoVertical(g.tabuleiro.get(i),visitados)){
                 ganhou=true;
@@ -177,6 +240,26 @@ public class Hex {
             copia.tabuleiro.get(i).peca = original.tabuleiro.get(i).peca;
         }
         return copia;
+    }
+
+    private int maximoScore(ArrayList<Integer> scores) {
+        int maior = -1;
+        for (int i = 0; i < scores.size(); i++) {
+            if (maior<scores.get(i)) {
+                maior=scores.get(i);
+            }
+        }
+        return maior;
+    }
+
+    private int minimoScore(ArrayList<Integer> scores) {
+         int menor = 1;
+        for (int i = 0; i < scores.size(); i++) {
+            if (menor>scores.get(i)) {
+                menor=scores.get(i);
+            }
+        }
+        return menor;
     }
     
     

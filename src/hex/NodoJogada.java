@@ -14,9 +14,10 @@ import java.util.ArrayList;
 public class NodoJogada {
     Grafo jogada;
     int score;
-    ArrayList<Grafo> proximas_Jogadas;
+    ArrayList<NodoJogada> proximas_Jogadas;
     ArrayList<Integer> scores;
     public NodoJogada(Grafo jogada){
+        scores = new ArrayList<>();
         proximas_Jogadas = new ArrayList<>();
         this.jogada = jogada;
     
