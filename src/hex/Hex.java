@@ -24,8 +24,20 @@ public class Hex {
             novo.score = 1;
             return novo;
         }
-        //construindo, para todos os grafos retornados, um objeto NodoJogada.
-        ArrayList<Grafo> possiveisJogadas = gerarJogadas(jogada, jogador);
+        
+        //se o jogador for a maquina, ele segue a heuristica das pontes, se nao puder mais formarmos pontes, nós geramos peças aleatoriamente...(esta heuristica trabalha depois da primeira jogada)
+        ArrayList<Grafo> possiveisJogadas = null;
+        if (jogador == 'v' & profundidade>1) {
+            possiveisJogadas = heuristicaPontes(jogada , jogador);
+        }
+       
+        if (possiveisJogadas==null) {
+            possiveisJogadas = gerarJogadas(jogada, jogador);
+        }
+        //se o jogador for a maquina, ele segue a heuristica das pontes, se nao puder mais formarmos pontes, nós geramos peças aleatoriamente...
+        
+        
+        //construindo, para todos os grafos retornados, um objeto NodoJogada.   
         for (int i = 0; i <possiveisJogadas.size(); i++) {
             NodoJogada novoFilho = new NodoJogada(possiveisJogadas.get(i));
             novo.proximas_Jogadas.add(novoFilho);
@@ -42,16 +54,18 @@ public class Hex {
                 int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'h').score;
                 novo.scores.add(auxScore);
             }
+            
+            //aqui a gente faz a poda
             if (jogador=='v' && novo.scores.get(i)==-1) {
-                novo.score=-1;
+                novo.score=1;
                 return novo;
             }else
-                if (jogador=='h'&& novo.scores.get(i)==1) {
-                    novo.score = 1;
+                if (jogador=='h'&& novo.scores.get(i)==-1) {
+                    novo.score = -1;
                     return novo;
             }
         }
-        if (profundidade%2==0) {                                                //par é máx
+        if (profundidade%2!=0) {                                                //par é máx
             int maiorScore = maximoScore(novo.scores);
             novo.score = maiorScore;
             System.out.println("to aqui pegando o maiorScore");
@@ -74,8 +88,8 @@ public class Hex {
         boolean alguemGanhou = false;
         Scanner tec = new Scanner(System.in);
         int jogadaHumano;
-        System.out.println("quer jogar com qual peça? h/v");
-        pecaHumano = tec.nextLine().charAt(0);
+        System.out.println("vc vai jogar com a peça h ");
+        pecaHumano = 'h';
         
         arvoreMinMax = MinMax(jogo,0,pecaHumano);
         do{
@@ -84,10 +98,11 @@ public class Hex {
             //jogada do humano
              System.out.println("escolha uma posição para sua jogada");
              jogadaHumano = tec.nextInt();
-             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ') {
+             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>jogo.tabuleiro.size() || jogadaHumano<0) {   //pede outo digito até q seja valido
                  System.out.println("esta posição esta ocupada, faça outra jogada válida");
+                 jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
              }
-             jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
+            
              
             //jogada do computador
              int jogadaComputador = minimoScore(arvoreMinMax.scores);
@@ -260,6 +275,44 @@ public class Hex {
             }
         }
         return menor;
+    }
+
+    private ArrayList<Grafo> heuristicaPontes(Grafo jogada, char jogador) {
+        ArrayList<Grafo> possiveisJogadas = new ArrayList<>();
+        for (Nodo a:jogada.tabuleiro) {
+            if (a.peca==jogador) {
+                if (a.numero+5<jogada.tabuleiro.size()) {
+                    jogada.tabuleiro.get(a.numero+5).peca=jogador;
+                    Grafo novo;
+                    novo = copiarGrafo(jogada);
+                    possiveisJogadas.add(novo);
+                    jogada.tabuleiro.get(a.numero+5).peca=' ';
+                }
+                if (a.numero-5>=0) {
+                    jogada.tabuleiro.get(a.numero-5).peca=jogador;
+                    Grafo novo;
+                    novo = copiarGrafo(jogada);
+                    possiveisJogadas.add(novo);
+                    jogada.tabuleiro.get(a.numero-5).peca=' '; 
+                }
+                if (a.numero+7<jogada.tabuleiro.size()) {
+                    jogada.tabuleiro.get(a.numero+7).peca=jogador;
+                    Grafo novo;
+                    novo = copiarGrafo(jogada);
+                    possiveisJogadas.add(novo);
+                    jogada.tabuleiro.get(a.numero+7).peca=' ';
+                }
+                if (a.numero-7>=0) {
+                    jogada.tabuleiro.get(a.numero-7).peca=jogador;
+                    Grafo novo;
+                    novo = copiarGrafo(jogada);
+                    possiveisJogadas.add(novo);
+                    jogada.tabuleiro.get(a.numero-7).peca=' ';
+                    
+                }
+            }
+        }
+        return possiveisJogadas;
     }
     
     
