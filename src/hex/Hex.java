@@ -16,10 +16,7 @@ public class Hex {
     
     public NodoJogada MinMax(Grafo jogada, int profundidade , char jogador){
         NodoJogada novo = new NodoJogada(jogada);
-        if (profundidade==10) {
-            novo.score = 0;
-            return novo;
-        }
+        
         if (horizontalGanhou(jogada)) {                                         //
             novo.score = -1;
             return novo;
@@ -63,14 +60,14 @@ public class Hex {
             }
             
             //aqui a gente faz a poda
-            if (jogador=='v' && novo.scores.get(i)==-1) {
-                novo.score=1;
-                return novo;
-            }else
-                if (jogador=='h'&& novo.scores.get(i)==-1) {
-                    novo.score = -1;
-                    return novo;
-            }
+//            if (jogador=='v' && novo.scores.get(i)==-1) {
+//                novo.score=1;
+//                return novo;
+//            }else
+//                if (jogador=='h'&& novo.scores.get(i)==-1) {
+//                    novo.score = -1;
+//                    return novo;
+//            }
         }
         if (profundidade%2==0) {                                                //par é máx
             int maiorScore = maximoScore(novo.scores);
@@ -114,7 +111,7 @@ public class Hex {
             //jogada do computador
              int jogadaComputador = minimoScore(arvoreMinMax.scores);
              arvoreMinMax = arvoreMinMax.proximas_Jogadas.get(jogadaComputador);
-             jogo.tabuleiro=arvoreMinMax.jogada.tabuleiro;
+             //jogo.tabuleiro=arvoreMinMax.jogada.tabuleiro;
              
              if (horizontalGanhou(jogo)||verticalGanhou(jogo)) {
                  if ((horizontalGanhou(jogo) & pecaHumano=='h')||(verticalGanhou(jogo) & pecaHumano=='v')) {
@@ -129,9 +126,9 @@ public class Hex {
              jogadaHumano = tec.nextInt();
              while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>jogo.tabuleiro.size() || jogadaHumano<0) {   //pede outo digito até q seja valido
                  System.out.println("esta posição esta ocupada, faça outra jogada válida");
-                 jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
              }
-            
+             jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
+             arvoreMinMax = MinMax(jogo,0,'v');
              
         
         }while(!alguemGanhou);   
