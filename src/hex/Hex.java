@@ -16,6 +16,10 @@ public class Hex {
     
     public NodoJogada MinMax(Grafo jogada, int profundidade , char jogador){
         NodoJogada novo = new NodoJogada(jogada);
+        if (profundidade==10) {
+            novo.score = 0;
+            return novo;
+        }
         if (horizontalGanhou(jogada)) {                                         //
             novo.score = -1;
             return novo;
@@ -29,6 +33,9 @@ public class Hex {
         ArrayList<Grafo> possiveisJogadas = null;
         if (jogador == 'v' & profundidade>1) {
             possiveisJogadas = heuristicaPontes(jogada , jogador);
+        }
+        if (jogador == 'v' & profundidade<=1) {
+            possiveisJogadas = primeiraJogadaMaquina(jogada , jogador);
         }
        
         if (possiveisJogadas==null) {
@@ -46,11 +53,11 @@ public class Hex {
         //chamndo o codigo de novo
         for (int i = 0; i < novo.proximas_Jogadas.size(); i++) {
             if (jogador == 'h'){
-                System.out.println("to aqui chamndo pra v");
+                //System.out.println("to aqui chamndo pra v");
                 int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'v').score;
                 novo.scores.add(auxScore);
             }else{
-                System.out.println("to aqui chamndo pra h");
+                //System.out.println("to aqui chamndo pra h");
                 int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'h').score;
                 novo.scores.add(auxScore);
             }
@@ -65,17 +72,17 @@ public class Hex {
                     return novo;
             }
         }
-        if (profundidade%2!=0) {                                                //par é máx
+        if (profundidade%2==0) {                                                //par é máx
             int maiorScore = maximoScore(novo.scores);
             novo.score = maiorScore;
-            System.out.println("to aqui pegando o maiorScore");
+        //    System.out.println("to aqui pegando o maiorScore");
         }
         else {
             int menorScore = minimoScore(novo.scores);                          //min é impar
             novo.score = menorScore;
-            System.out.println("to aqui pegando o menor score");
+            //System.out.println("to aqui pegando o menor score");
         }
-        System.out.println("to aqui retornando");    
+        //System.out.println("to aqui retornando");    
         return novo;
     }
     
@@ -91,19 +98,19 @@ public class Hex {
         System.out.println("vc vai jogar com a peça h ");
         pecaHumano = 'h';
         
-        arvoreMinMax = MinMax(jogo,0,pecaHumano);
-        do{
-        while(!alguemGanhou){
-            
-            //jogada do humano
+        
+        do{ //quer jogar de novo?
+            //primeira jogada do humano 
              System.out.println("escolha uma posição para sua jogada");
              jogadaHumano = tec.nextInt();
-             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>jogo.tabuleiro.size() || jogadaHumano<0) {   //pede outo digito até q seja valido
+             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>jogo.tabuleiro.size() || jogadaHumano<0) {   //pede outro digito até q seja valido
                  System.out.println("esta posição esta ocupada, faça outra jogada válida");
-                 jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
              }
+             jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
+             arvoreMinMax = MinMax(jogo,0,'v');
+        do{  //loop do jogo
             
-             
+            
             //jogada do computador
              int jogadaComputador = minimoScore(arvoreMinMax.scores);
              arvoreMinMax = arvoreMinMax.proximas_Jogadas.get(jogadaComputador);
@@ -116,13 +123,24 @@ public class Hex {
                      System.out.println("eu ganhei fii.");
                  alguemGanhou =true;
             }
+             
+             //jogada do humano
+             System.out.println("escolha uma posição para sua jogada");
+             jogadaHumano = tec.nextInt();
+             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>jogo.tabuleiro.size() || jogadaHumano<0) {   //pede outo digito até q seja valido
+                 System.out.println("esta posição esta ocupada, faça outra jogada válida");
+                 jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
+             }
+            
+             
         
-        }
+        }while(!alguemGanhou);   
             System.out.println("quer jogar de novo? s/n");
             char resposta = tec.nextLine().charAt(0);
             if (resposta=='n') {
                 jogarNovamente = false;
             }
+        
         }while(jogarNovamente);
         
     
@@ -130,20 +148,24 @@ public class Hex {
     
     
     public boolean horizontalGanhou(Grafo g){
+        
         boolean ganhou=false;
+        try{
         ArrayList<Integer> visitados = new ArrayList<Integer>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
            if (g.tabuleiro.get(i*4).peca=='h') {
                if(temCaminhoHorizontal( g.tabuleiro.get(i*4),visitados)){
                 ganhou=true;
                } 
             }
         }
-        
+        }catch(Exception e){printGrafo(g);}
         return ganhou;
+        
     }
     public boolean verticalGanhou(Grafo g){
         boolean ganhou=false;
+        try{
         ArrayList<Integer> visitados = new ArrayList<Integer>();
         for (int i = 0; i < 4; i++) {
             if (g.tabuleiro.get(i).peca=='v') {
@@ -153,7 +175,7 @@ public class Hex {
             }
            
         }
-        
+        }catch(Exception e){printGrafo(g);}
         return ganhou;
     }
 
@@ -162,7 +184,7 @@ public class Hex {
      */
     
 
-    private boolean temCaminhoHorizontal( Nodo atual,ArrayList<Integer> visitados) {
+    private boolean temCaminhoHorizontal( Nodo atual,ArrayList<Integer> visitados)throws Exception{
         //busca do caminho
         boolean chegouDoOutrolado = false;
         visitados.add(atual.numero);                                                //bota o vertice atual na lista de vertices já visitados.
@@ -182,7 +204,7 @@ public class Hex {
         return chegouDoOutrolado;
     }
     
-    private ArrayList<Nodo> fronteiraPeca(Nodo atual, char tipo) {
+    private ArrayList<Nodo> fronteiraPeca(Nodo atual, char tipo)throws Exception {
         ArrayList<Nodo> fronteira = new ArrayList<>();                              //guardará os vértices que fazem fronteira com o vertice atual
         
         for (Nodo v: atual.vizinhos) {                                              //passando por todos os vizinhos do no atual.
@@ -215,7 +237,7 @@ public class Hex {
         return i/4;
     }
 
-    private boolean temCaminhoVertical(Nodo atual, ArrayList<Integer> visitados) {
+    private boolean temCaminhoVertical(Nodo atual, ArrayList<Integer> visitados)throws Exception {
          //busca do caminho
         boolean chegouDoOutrolado = false;
         visitados.add(atual.numero);                                                //bota o vertice atual na lista de vertices já visitados.
@@ -313,6 +335,36 @@ public class Hex {
             }
         }
         return possiveisJogadas;
+    }
+
+    private ArrayList<Grafo> primeiraJogadaMaquina(Grafo jogada, char jogador) {
+        ArrayList<Grafo> jogadas = new ArrayList<>();
+        int parametro = 0;                                                          //vamos usar este parametro para fazer a jogada inicial da maquina(será a posicao iniciaal do jogador humano)
+        for (int i = 0; i < jogada.tabuleiro.size(); i++) {
+            if (jogada.tabuleiro.get(i).peca=='h') {
+                parametro = i;
+                break;
+            }
+        }
+                int geradorJogada = (int) Math.round( Math.random() *16 );
+                while(nivelColuna(parametro)==nivelColuna(geradorJogada)){
+                   geradorJogada  = (int)Math.random()*16; 
+                
+                }   
+                jogada.tabuleiro.get(geradorJogada).peca=jogador;
+                Grafo novo;
+                novo = copiarGrafo(jogada);
+                jogadas.add(novo);
+                jogada.tabuleiro.get(geradorJogada).peca=' ';
+        return jogadas;
+    }
+
+    private void printGrafo(Grafo g) {
+        for (int i = 0; i < g.tabuleiro.size(); i++) {
+            System.out.println(i+" = "+g.tabuleiro.get(i));
+            System.out.println("");
+        }
+        
     }
     
     
