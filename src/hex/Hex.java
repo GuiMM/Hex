@@ -14,15 +14,19 @@ import java.util.Scanner;
  */
 public class Hex {
     
-    public NodoJogada MinMax(Grafo jogada, int profundidade , char jogador){
+    public NodoJogada minMax(Grafo jogada, int profundidade , char jogador){
         NodoJogada novo = new NodoJogada(jogada);
         
         if (horizontalGanhou(jogada)) {                                         //
-            novo.score = -1;
+            novo.score = 1;
             return novo;
         }
         if (verticalGanhou(jogada)) {
-            novo.score = 1;
+            novo.score = -1;
+            return novo;
+        }
+        if (profundidade>9) {
+            novo.score = 0;
             return novo;
         }
         
@@ -39,35 +43,28 @@ public class Hex {
             possiveisJogadas = gerarJogadas(jogada, jogador);
         }
         //se o jogador for a maquina, ele segue a heuristica das pontes, se nao puder mais formarmos pontes, nós geramos peças aleatoriamente...
-        
-        
-        //construindo, para todos os grafos retornados, um objeto NodoJogada.   
-        for (int i = 0; i <possiveisJogadas.size(); i++) {
-            NodoJogada novoFilho = new NodoJogada(possiveisJogadas.get(i));
-            novo.proximas_Jogadas.add(novoFilho);
-        }
-        
+          
         //chamndo o codigo de novo
-        for (int i = 0; i < novo.proximas_Jogadas.size(); i++) {
+        for (int i = 0; i < possiveisJogadas.size(); i++) {
             if (jogador == 'h'){
-                //System.out.println("to aqui chamndo pra v");
-                int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'v').score;
-                novo.scores.add(auxScore);
+                NodoJogada aux=minMax(possiveisJogadas.get(i),profundidade+1,'v');
+                novo.proximas_Jogadas.add(aux);
+                novo.scores.add(aux.score);
             }else{
-                //System.out.println("to aqui chamndo pra h");
-                int auxScore = MinMax(novo.proximas_Jogadas.get(i).jogada,profundidade+1,'h').score;
-                novo.scores.add(auxScore);
+                NodoJogada aux=minMax(possiveisJogadas.get(i),profundidade+1,'h');
+                novo.proximas_Jogadas.add(aux);
+                novo.scores.add(aux.score);
             }
             
             //aqui a gente faz a poda
-//            if (jogador=='v' && novo.scores.get(i)==-1) {
-//                novo.score=1;
-//                return novo;
-//            }else
-//                if (jogador=='h'&& novo.scores.get(i)==-1) {
-//                    novo.score = -1;
-//                    return novo;
-//            }
+            if (jogador=='v' && novo.scores.get(i)==-1) {
+                novo.score=-1;
+                return novo;
+            }else
+                if (jogador=='h'&& novo.scores.get(i)==1) {
+                    novo.score = 1;
+                    return novo;
+            }
         }
         if (profundidade%2==0) {                                                //par é máx
             int maiorScore = maximoScore(novo.scores);
@@ -86,7 +83,6 @@ public class Hex {
     public void start(Grafo inicio){
         //implementar o jogo. Minmax ta pronto(mas falta debugar).
         boolean jogarNovamente =true;
-        Grafo jogo = new Grafo();
         NodoJogada arvoreMinMax;
         char pecaHumano;
         boolean alguemGanhou = false;
@@ -97,21 +93,23 @@ public class Hex {
         
         
         do{ //quer jogar de novo?
-            //primeira jogada do humano 
+            //primeira jogada do humano
+            Grafo primeiraJogada = new Grafo();
+            Grafo jogo;
              System.out.println("escolha uma posição para sua jogada");
              jogadaHumano = tec.nextInt();
-             while (jogo.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>jogo.tabuleiro.size() || jogadaHumano<0) {   //pede outro digito até q seja valido
+             while (primeiraJogada.tabuleiro.get(jogadaHumano).peca!= ' ' || jogadaHumano>primeiraJogada.tabuleiro.size() || jogadaHumano<0) {   //pede outro digito até q seja valido
                  System.out.println("esta posição esta ocupada, faça outra jogada válida");
              }
-             jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
-             arvoreMinMax = MinMax(jogo,0,'v');
+             primeiraJogada.tabuleiro.get(jogadaHumano).peca=pecaHumano;
+             arvoreMinMax = minMax(primeiraJogada,0,'h');
         do{  //loop do jogo
             
             
             //jogada do computador
              int jogadaComputador = minimoScore(arvoreMinMax.scores);
              arvoreMinMax = arvoreMinMax.proximas_Jogadas.get(jogadaComputador);
-             //jogo.tabuleiro=arvoreMinMax.jogada.tabuleiro;
+             jogo = this.copiarGrafo(arvoreMinMax.jogada);
              
              if (horizontalGanhou(jogo)||verticalGanhou(jogo)) {
                  if ((horizontalGanhou(jogo) & pecaHumano=='h')||(verticalGanhou(jogo) & pecaHumano=='v')) {
@@ -128,7 +126,7 @@ public class Hex {
                  System.out.println("esta posição esta ocupada, faça outra jogada válida");
              }
              jogo.tabuleiro.get(jogadaHumano).peca=pecaHumano;
-             arvoreMinMax = MinMax(jogo,0,'v');
+             
              
         
         }while(!alguemGanhou);   
